@@ -13,8 +13,9 @@ pure theory and contains no data. The prices it is a theory of are public.
 
 So this repository collects them.
 
-**Access date: 2026-09-07. 61 rows, 5 providers, 44 model-tier
-combinations.**
+**Cross-section:** 61 rows, 5 providers, read 2026-09-07.
+**History:** 188 archived captures, 6 providers, 2023-01 to 2026-09,
+collected and catalogued — **not yet parsed into prices.**
 
 ---
 
@@ -71,16 +72,45 @@ Reproduce all of this with `python3 scripts/analyze.py`.
 
 ---
 
+## The price history
+
+`scripts/fetch_wayback.py` has been run. It pulled one Internet Archive
+capture per calendar month for each provider's pricing page and catalogued
+every one in `raw/manifest.csv`, which records the capture timestamp and
+the exact archive URL each file came from.
+
+| provider | captures | earliest |
+|---|---:|---|
+| OpenAI | 45 | 2023-01 |
+| Google | 34 | |
+| Mistral | 31 | |
+| Anthropic | 28 | |
+| DeepSeek | 27 | |
+| xAI | 23 | |
+
+The archived HTML is about 50 MB and is deliberately **not** committed. The
+manifest makes it reproducible: re-run the script, or fetch any single
+capture from the archive URL in the manifest.
+
+**These captures have not been parsed yet.** Nothing in this repository
+currently makes a claim about how prices moved over time. Writing the
+parser is the next piece of work, and it is not trivial — the providers
+redesigned their pricing pages several times over three years, and a
+parser that silently drifts across layouts is worse than no parser.
+
+---
+
 ## Layout
 
 ```
 data/prices_current.csv     the cross-section
+raw/manifest.csv            188 archive captures: timestamp + source URL
 scripts/build_current.py    hand-transcribed source records -> csv
 scripts/analyze.py          the ratios above
-scripts/fetch_wayback.py    monthly history collector (see caveat below)
+scripts/fetch_wayback.py    monthly history collector
 ```
 
-### Columns
+### Columns in `prices_current.csv`
 
 | column | meaning |
 |---|---|
@@ -99,22 +129,22 @@ scripts/fetch_wayback.py    monthly history collector (see caveat below)
 
 ## How it was built, and what is wrong with it
 
-Every row was transcribed by hand from the provider's own documentation on
-the access date. No price-comparison site, aggregator or blog was used as a
-source, and no missing value was imputed — where a provider does not
-publish a number the field is empty.
+Every row in the cross-section was transcribed by hand from the provider's
+own documentation on the access date. No price-comparison site, aggregator
+or blog was used as a source, and no missing value was imputed — where a
+provider does not publish a number the field is empty.
 
 Known limitations, in the order they would bite:
 
-- **One time point.** The Wayback Machine was unreachable from the machine
-  used to build this, so the history is not here yet.
-  `scripts/fetch_wayback.py` is written and documented but **has not been
-  run**. Nothing in this repository has been checked over time.
-- **DeepSeek is missing.** Its official pricing page did not resolve on the
-  access date. Third-party figures were available and were not used.
-- **List prices, not transaction prices.** Enterprise contracts, committed-use
-  discounts and negotiated rates are invisible here, and for the largest
-  buyers those are the prices that exist.
+- **The analysis is still one time point.** The captures are collected but
+  unparsed, so every number above describes a single day.
+- **DeepSeek is missing from the cross-section.** Its official pricing page
+  did not render on the access date. Third-party figures were available and
+  were not used. Its 27 archived captures are in the manifest, so the gap
+  closes when the parser exists.
+- **List prices, not transaction prices.** Enterprise contracts,
+  committed-use discounts and negotiated rates are invisible here, and for
+  the largest buyers those are the prices that exist.
 - **Batch, flex and priority tiers are only partly captured.** Google
   publishes four service tiers; only standard is in the table.
 - **Fine-tuning is barely covered.** OpenAI bills training by the hour, not
@@ -123,11 +153,10 @@ Known limitations, in the order they would bite:
 - **Model identity is not stable.** A provider can change what sits behind
   a model name without changing the name. Nothing here detects that.
 
-The three patterns above are descriptive statistics on a single day. Ratios
-this clean are usually a sign of an administered price — a number chosen for
-being round and defensible rather than derived — but distinguishing that
-from a genuine cost ratio needs the time series, and the time series is the
-next piece of work.
+Ratios as clean as the ones above are usually a sign of an administered
+price — a number chosen for being round and defensible rather than derived
+from costs — but distinguishing that from a genuine cost ratio needs the
+time series, and the time series is not parsed yet.
 
 ---
 
@@ -141,10 +170,8 @@ pip install requests
 python3 scripts/fetch_wayback.py --from 2023-01 --to 2026-09
 ```
 
-`fetch_wayback.py` downloads raw archived HTML and writes a manifest
-recording which capture each file came from. It does not parse prices. Read
-a few files by hand before writing a parser — provider pages change layout,
-and a parser that drifts silently is worse than no parser at all.
+`fetch_wayback.py` is incremental: it skips months already on disk, so it
+is safe to re-run to extend coverage.
 
 ---
 
