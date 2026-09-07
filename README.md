@@ -156,13 +156,6 @@ Numbers from aggregator sites will not be merged.
 
 ---
 
-## Author
-
-Mirakmal Minarov — first-year undergraduate, British Management University,
-Tashkent.
-
-Built after reading the Bergemann–Bonatti–Smolin paper and wanting to know
-whether Proposition 7 survives contact with the price sheets.
 
 ## License
 
