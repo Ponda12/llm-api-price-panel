@@ -2,5 +2,9 @@ __pycache__/
 *.pyc
 .venv/
 .DS_Store
-raw/
+Thumbs.db
+
+# Archived HTML is large (~50 MB) and re-fetchable: every capture's exact
+# archive URL is recorded in raw/manifest.csv, which IS tracked.
+raw/*
 !raw/manifest.csv
